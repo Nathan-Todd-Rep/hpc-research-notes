@@ -54,6 +54,39 @@ Output saved to ~/.inkly/gaussian_docs.json.
 
 ---
 
+## Growing the Dataset
+
+### Raise MAX_PASSAGES_PER_SOURCE to 30
+
+Changed `MAX_PASSAGES_PER_SOURCE` in `extractor.py` from 10 to 30. No test failures. Passages went from 50 to 126, words from 1,881 to 5,221.
+
+### Add More Stack Exchange Tags
+
+Added 4 new Matter Modeling SE tags to `sources.py`:
+- `density-functional-theory` (1545 questions)
+- `computational-chemistry` (388 questions)
+- `quantum-chemistry` (322 questions)
+- `high-performance-computing` (151 questions)
+
+Passages went from 126 to 237, words to 25,422, file size to 161.7 KB.
+
+### Add More HPC Doc Sites
+
+Tested several candidate URLs. Two confirmed working with good content:
+- Alliance Canada - skipped by scraper (likely JS-rendered, to revisit later)
+- HPC Wiki - OK, 30 passages extracted
+
+Final dataset after all changes:
+
+| Metric | Value |
+|---|---|
+| Sources | 10 |
+| Total passages | 267 |
+| Total words | 26,651 |
+| File size | 169.4 KB |
+
+---
+
 ## Related Notes
 
 - [[Work Session 5]] - previous session where scraper was optimized

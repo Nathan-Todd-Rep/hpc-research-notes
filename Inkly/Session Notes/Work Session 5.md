@@ -22,7 +22,7 @@ The fetcher was sending a minimal User-Agent string (`Mozilla/5.0 (research docu
 
 **`gaussian_scraper/fetcher.py`**
 - Upgraded User-Agent to a realistic Chrome browser string
-- Added `REQUEST_DELAY_SEC = 2` — a 2 second sleep before each page fetch
+- Added `REQUEST_DELAY_SEC = 2` , a 2 second sleep before each page fetch
 - Updated `fetch_page_text` to return a tuple `(text | None, status_code | None)` instead of just `text | None`
   - Returns `(None, None)` on network error
   - Returns `(None, status_code)` on non-200 response
@@ -61,18 +61,18 @@ Added a new `gaussian_scraper/ollama_query.py` module to handle live Gaussian qu
 Three issues identified and fixed:
 
 **Issue 1 No availability check before summarizing**
-- Added `is_ollama_available()` to `summarizer.py` — pings `http://localhost:11434` with a 5s timeout
+- Added `is_ollama_available()` to `summarizer.py` , pings `http://localhost:11434` with a 5s timeout
 - `summarize_results()` in `scrape.py` now calls this once upfront and exits early with a clear message if Ollama is down, rather than silently timing out per source
 - Added 3 tests: reachable, not reachable, non-200
 
 **Issue 2  Prompt had no source context**
 - Updated `_PROMPT_TEMPLATE` to include a `{source}` placeholder
-- Added `label` parameter to `summarize_passages()` — defaults to `"HPC documentation about Gaussian"`
+- Added `label` parameter to `summarize_passages()` , defaults to `"HPC documentation about Gaussian"`
 - `scrape.py` now passes the source label through so Ollama knows where the passages came from
 
 **Issue 3  Too many passages per prompt**
 - Added `MAX_PASSAGES_TO_SUMMARIZE = 5` constant
-- Passages are sliced to the top 5 before being included in the prompt — the extractor already ranks by relevance so these are the best ones
+- Passages are sliced to the top 5 before being included in the prompt , the extractor already ranks by relevance so these are the best ones
 - Added 1 test to confirm the cap is enforced
 
 ### Result
