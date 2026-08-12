@@ -12,6 +12,8 @@
 - [x] Diagnose why the first real test silently failed
 - [x] Fix the root cause and make the fix configurable
 - [x] Verify the fix against the real model again
+- [x] Run a full scrape of both domains with real summarization enabled
+- [x] Decide what to do about the sources that still miss the timeout
 
 ---
 
@@ -56,6 +58,23 @@ Retested against the real model, not mocked, twice more:
 - Summary content was checked for accuracy against the source passages both times: no fabricated facts, consistent with the anti-hallucination prompt rules from Work Session 7.
 
 118/118 tests passing.
+
+---
+
+## Full Scrape With Real Summarization
+
+Ran both saved configs end to end with the fixed timeout, not a sample, the actual production configs: `py scrape.py --config configs/gaussian.toml` and the same for bioinformatics. Ran in the background since a full run with real per-source summarization takes a while.
+
+Results:
+- Gaussian: 25 sources scraped, 556 passages, 19 of 25 sources got a summary.
+- Bioinformatics: 21 sources scraped, 468 passages, 15 of 21 sources got a summary.
+- Scraping, dedup, and saving succeeded for every single source in both domains. The gaps are only in the optional summarization step, which is designed to fall back to raw passages rather than fail the run.
+
+Diagnosed one of the misses directly the same way as the earlier timeout bug: a Matter Modeling Stack Exchange source had a longer prompt (3416 characters versus about 1182 for a typical HTML source) and took 204.9 seconds with no timeout applied, well past the 120s default.
+
+This showed my first theory was too narrow. It is not simply "Stack Exchange sources are slower." Two plain HTML pages (Harvard RC, HPC Wiki) also missed the timeout, while several Stack Exchange tags (quantum-chemistry, basis-sets, td-dft, hpc) succeeded well within it. The real pattern is plain CPU-inference timing variance across a long sequential run of 46 total summarization calls, not something tied to source type. There is no single fixed timeout that guarantees zero fallbacks under that kind of variance, only a tradeoff between how long a slow-but-working request is allowed to run before giving up.
+
+**Decision: leave `REQUEST_TIMEOUT_SEC` at 120s, no further code change.** `--summary-timeout` already exists as a manual override for anyone who wants to push for fuller coverage on a specific run. The current default already fixed the original silent-failure bug (30s was catching legitimate successful requests), and the remaining gap is a genuine tradeoff rather than a bug to chase further right now.
 
 ---
 
